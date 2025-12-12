@@ -1,0 +1,57 @@
+# Multi-service container: QDrant + Ollama
+
+# Stage 1: Get QDrant binary from official image
+FROM qdrant/qdrant:latest AS qdrant
+
+# Stage 2: Build the combined image
+FROM ubuntu:22.04
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies (including libunwind8 for QDrant)
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    libunwind8 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy QDrant binary from official image
+COPY --from=qdrant /qdrant/qdrant /usr/local/bin/qdrant
+
+# Install Ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+# Create directories for data persistence
+RUN mkdir -p /data /models
+
+# Set environment variables
+ENV QDRANT__STORAGE__PATH=/data
+ENV OLLAMA_MODELS=/models
+ENV OLLAMA_HOST=0.0.0.0
+
+# Expose ports
+# QDrant HTTP API
+EXPOSE 6333
+# QDrant gRPC
+EXPOSE 6334
+# Ollama API
+EXPOSE 11434
+
+# Copy startup script
+COPY utils/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Health check for both services
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:6333/health && curl -f http://localhost:11434/api/tags || exit 1
+
+# Set volumes for data persistence
+VOLUME ["/data", "/models"]
+
+# Start both services
+CMD ["/start.sh"]
+

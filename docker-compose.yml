@@ -1,0 +1,29 @@
+services:
+  ragapi:
+    build: .
+    container_name: ragapi
+    ports:
+      # QDrant HTTP API
+      - "6333:6333"
+      # QDrant gRPC
+      - "6334:6334"
+      # Ollama API
+      - "11434:11434"
+    volumes:
+      # Vector database storage (Qdrant collections)
+      - ./collections:/collections
+      # LLM model storage
+      - ./models:/models
+    environment:
+      - QDRANT__STORAGE__PATH=/collections
+      - OLLAMA_MODELS=/models
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    # Give services time to start up properly
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+

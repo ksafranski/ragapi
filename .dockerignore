@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Data directories (we want fresh mounts, not copied data)
+data/
+models/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.cursor/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build artifacts
+*.tar
+*.tar.gz
+
+
