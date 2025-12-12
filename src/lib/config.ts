@@ -1,6 +1,6 @@
 import type { AppConfig, CollectionConfig } from '../types';
 
-const CONFIG_PATH = './config.json';
+const CONFIG_PATH = process.env.CONFIG_PATH || './config.json';
 
 const defaultConfig: AppConfig = {
   collections: {},

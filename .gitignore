@@ -3,6 +3,8 @@ node_modules
 
 # config (contains API tokens and collection mappings)
 config.json
+config/*
+!config/.gitkeep
 
 # qdrant collections data
 collections

@@ -1,31 +1,34 @@
+# Development compose file - runs only backend services (Qdrant + Ollama)
+# Use this when you want to run the Bun API locally with hot reload
+
 services:
-  ragapi:
-    build: .
-    container_name: ragapi
+  backends:
+    image: ragapi-backends
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ragapi-backends
     ports:
-      # RAGAPI (main API - this is what you'll use)
-      - "3000:3000"
-      # QDrant HTTP API (optional, for direct access)
+      # QDrant HTTP API
       - "6333:6333"
-      # QDrant gRPC (optional)
+      # QDrant gRPC
       - "6334:6334"
-      # Ollama API (optional, for direct access)
+      # Ollama API
       - "11434:11434"
     volumes:
       # Vector database storage (Qdrant collections)
       - ./collections:/data
       # LLM model storage
       - ./models:/models
-      # RAGAPI config (collection metadata)
-      - ./config:/config
     environment:
       - QDRANT__STORAGE__PATH=/data
       - OLLAMA_MODELS=/models
       - OLLAMA_HOST=0.0.0.0
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/models"]
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+

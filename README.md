@@ -1,21 +1,17 @@
 # RAGAPI
 
-A lightweight unified API for RAG (Retrieval Augmented Generation) that sits on top of Qdrant and Ollama.
+A lightweight unified API for RAG (Retrieval Augmented Generation) that bundles Qdrant, Ollama, and a simple REST API into a single container.
 
-## Setup
+## Quick Start (Docker)
 
 ```bash
-# Install dependencies
-bun install
-
-# Start Qdrant + Ollama (via Docker)
+# Start everything with one command
 docker compose up
 
-# Start the API server
-bun run dev
+# That's it! The API is now available at http://localhost:3000
 ```
 
-## Quick Start
+The first build will take a few minutes. Once you see "All services started!", you're good to go.
 
 ### 1. Pull the models
 
@@ -95,3 +91,39 @@ curl -X POST http://localhost:3000/query \
 ```
 
 Responses stream back as newline-delimited JSON. When using RAG, the final line includes the source documents that were used as context.
+
+## Ports
+
+| Port | Service | Description |
+|------|---------|-------------|
+| 3000 | RAGAPI | Main API (use this one) |
+| 6333 | Qdrant | Vector DB HTTP API (direct access) |
+| 6334 | Qdrant | Vector DB gRPC |
+| 11434 | Ollama | LLM API (direct access) |
+
+## Data Persistence
+
+Data is stored in local directories that are mounted into the container:
+
+- `./collections/` - Vector database storage
+- `./models/` - Downloaded LLM models (can get large!)
+- `./config/` - Collection metadata (embedding model mappings)
+
+---
+
+## Development
+
+If you want to work on the API itself, run the backend services separately so you can use hot reload:
+
+```bash
+# Install dependencies
+bun install
+
+# Start just the backend services (Qdrant + Ollama)
+docker compose -f docker-compose.dev.yml up
+
+# In another terminal, start the API server with hot reload
+bun run dev
+```
+
+The dev compose file uses `Dockerfile.dev` and `utils/start-dev.sh` which only start Qdrant and Ollama, leaving port 3000 free for your local Bun server.
