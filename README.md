@@ -2,16 +2,36 @@
 
 A lightweight unified API for RAG (Retrieval Augmented Generation) that bundles Qdrant, Ollama, and a simple REST API into a single container.
 
-## Quick Start (Docker)
+## Quick Start
+
+### Option 1: Pre-built Docker Image (Recommended)
 
 ```bash
-# Start everything with one command
-docker compose up
+docker run \
+  --name ragapi \
+  -p 3000:3000 \
+  -p 6333:6333 \
+  -p 11434:11434 \
+  -v $(pwd)/collections:/data \
+  -v $(pwd)/models:/models \
+  -v $(pwd)/config:/config \
+  ghcr.io/ksafranski/ragapi:latest
+```
 
-# That's it! The API is now available at http://localhost:3000
+### Option 2: Docker Compose (Local Build)
+
+Clone the repo and build locally:
+
+```bash
+# Clone and start
+git clone https://github.com/ksafranski/ragcli.git
+cd ragcli
+docker compose up
 ```
 
 The first build will take a few minutes. Once you see "All services started!", you're good to go.
+
+## Basic Usage
 
 ### 1. Pull the models
 
